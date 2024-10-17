@@ -1,23 +1,129 @@
 let points = [];
+let uploadedImage = null; // Variabel untuk menyimpan gambar yang di-upload
 
-// Fungsi untuk memastikan tidak ada tabrakan antara titik
-function isColliding(newPoint, radius) {
+// Fungsi untuk menangani gambar yang di-upload
+document.getElementById('imageUpload').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+            uploadedImage = img; // Simpan gambar yang di-upload
+        };
+    };
+
+    if (file) {
+        reader.readAsDataURL(file);
+    }
+});
+
+// Fungsi menggambar titik (sekarang mendukung gambar yang di-upload)
+function drawPoint(ctx, x, y, radius) {
+    if (uploadedImage) {
+        // Jika ada gambar yang di-upload, gunakan gambar sebagai titik
+        const imgWidth = radius * 2;
+        const imgHeight = radius * 2;
+        ctx.drawImage(uploadedImage, x - radius, y - radius, imgWidth, imgHeight);
+    } else {
+        // Jika tidak ada gambar yang di-upload, gunakan lingkaran default
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+    }
+}
+
+// Fungsi untuk mengecek tabrakan antara titik
+function isColliding(point, radius) {
     for (let i = 0; i < points.length; i++) {
-        const point = points[i];
-        const distance = Math.sqrt((newPoint.x - point.x) ** 2 + (newPoint.y - point.y) ** 2);
-        if (distance < radius + point.radius) {
-            return true; // Titik bertabrakan
+        const existingPoint = points[i];
+        const dx = existingPoint.x - point.x;
+        const dy = existingPoint.y - point.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < existingPoint.radius + radius) {
+            return true;
         }
     }
     return false;
 }
 
-// Helper function to draw a custom circle point
-function drawPoint(ctx, x, y, radius) {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'black';
-    ctx.fill();
+// Fungsi untuk generate pola simetris
+function drawSymmetricPattern(ctx) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const maxRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
+    const pointsCount = 500;
+
+    for (let i = 0; i < pointsCount; i++) {
+        const angle = (i / pointsCount) * Math.PI * 2;
+        const radius = maxRadius * (i / pointsCount); // Simetris, titik mengikuti jari-jari bertahap
+
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        const pointSize = (i / pointsCount) * 15 + 5;
+
+        if (!isColliding({ x, y }, pointSize)) {
+            drawPoint(ctx, x, y, pointSize);
+            points.push({ x, y, radius: pointSize });
+        }
+    }
+}
+
+// Fungsi untuk generate pola acak
+function drawRandomPattern(ctx) {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const pointsCount = 500;
+
+    for (let i = 0; i < pointsCount; i++) {
+        const x = Math.random() * canvasWidth; // Koordinat acak X
+        const y = Math.random() * canvasHeight; // Koordinat acak Y
+        const pointSize = Math.random() * 15 + 5; // Ukuran titik acak
+
+        if (!isColliding({ x, y }, pointSize)) {
+            drawPoint(ctx, x, y, pointSize);
+            points.push({ x, y, radius: pointSize });
+        }
+    }
+}
+
+// Fungsi untuk generate pola gelombang
+function drawWavePattern(ctx) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const maxRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
+    const pointsCount = 500;
+    const frequency = 10;
+    const amplitude = 50;
+
+    for (let i = 0; i < pointsCount; i++) {
+        const angle = (i / pointsCount) * Math.PI * 2;
+        const wave = Math.sin(frequency * angle) * amplitude; // Gelombang sinusoidal
+
+        const radius = maxRadius + wave;
+
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        const pointSize = (i / pointsCount) * 15 + 5;
+
+        if (!isColliding({ x, y }, pointSize)) {
+            drawPoint(ctx, x, y, pointSize);
+            points.push({ x, y, radius: pointSize });
+        }
+    }
+}
+
+// Fungsi download gambar dari canvas
+function downloadImage() {
+    const canvas = document.getElementById('canvas');
+    const link = document.createElement('a');
+    link.download = 'nirmana_titik.png'; // Nama file unduhan
+    link.href = canvas.toDataURL(); // Mengubah canvas menjadi data URL gambar
+    link.click(); // Simulasi klik untuk memulai unduhan
 }
 
 // Generate pattern based on the selected option
@@ -47,146 +153,16 @@ function generatePattern() {
         case 'fractal':
             drawSierpinskiFractal(ctx);
             break;
+        case 'symmetric': // Pola Simetris
+            drawSymmetricPattern(ctx);
+            break;
+        case 'random': // Pola Acak
+            drawRandomPattern(ctx);
+            break;
+        case 'wave': // Pola Gelombang
+            drawWavePattern(ctx);
+            break;
         default:
             break;
     }
-}
-
-// Ensure that canvas size is adjusted
-function adjustCanvasSize() {
-    const canvas = document.getElementById('canvas');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-window.addEventListener('resize', adjustCanvasSize);
-adjustCanvasSize();
-
-// Generate a random size between min and max for the circles
-function randomSize(min, max) {
-    return Math.random() * (max - min) + min;
-}
-
-// Lissajous curve pattern with non-colliding circles
-function drawLissajousPattern(ctx) {
-    const A = 150, B = 150; // Amplitudes
-    const a = 5, b = 4; // Frequencies
-    const delta = Math.PI / 2; // Phase shift
-    const pointsCount = 1000;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    for (let t = 0; t < pointsCount; t++) {
-        const x = centerX + A * Math.sin(a * t * 0.01 + delta);
-        const y = centerY + B * Math.sin(b * t * 0.01);
-        const radius = randomSize(5, 20); // Random radius between 5 and 20
-
-        if (!isColliding({x, y}, radius)) {
-            drawPoint(ctx, x, y, radius);
-            points.push({x, y, radius});
-        }
-    }
-}
-
-// Spiral pattern with non-colliding circles
-function drawSpiralPattern(ctx) {
-    const a = 5;
-    const b = 0.2;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const maxAngle = Math.PI * 8;
-    const pointsCount = 1000;
-
-    for (let t = 0; t < maxAngle; t += maxAngle / pointsCount) {
-        const r = a * Math.exp(b * t);
-        const x = centerX + r * Math.cos(t);
-        const y = centerY + r * Math.sin(t);
-        const radius = randomSize(5, 20);
-
-        if (!isColliding({x, y}, radius)) {
-            drawPoint(ctx, x, y, radius);
-            points.push({x, y, radius});
-        }
-    }
-}
-
-// Flower pattern with non-colliding circles
-function drawFlowerPattern(ctx) {
-    const k = 7;
-    const pointsCount = 1000;
-    const size = 200;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    for (let t = 0; t < pointsCount; t++) {
-        const theta = (t / pointsCount) * Math.PI * 2;
-        const r = size * Math.cos(k * theta);
-        const x = centerX + r * Math.cos(theta);
-        const y = centerY + r * Math.sin(theta);
-        const radius = randomSize(5, 20);
-
-        if (!isColliding({x, y}, radius)) {
-            drawPoint(ctx, x, y, radius);
-            points.push({x, y, radius});
-        }
-    }
-}
-
-// Lemniscate pattern with non-colliding circles
-function drawLemniscatePattern(ctx) {
-    const a = 200;
-    const pointsCount = 1000;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    for (let t = 0; t < pointsCount; t++) {
-        const theta = (t / pointsCount) * Math.PI * 2;
-        const r = a * Math.sqrt(Math.cos(2 * theta));
-        const x = centerX + r * Math.cos(theta);
-        const y = centerY + r * Math.sin(theta);
-        const radius = randomSize(5, 20);
-
-        if (!isColliding({x, y}, radius)) {
-            drawPoint(ctx, x, y, radius);
-            points.push({x, y, radius});
-        }
-    }
-}
-
-// Sierpinski Fractal pattern is inherently non-colliding
-function drawSierpinskiFractal(ctx, depth = 5) {
-    const size = canvas.height * 0.8;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    function drawTriangle(x, y, size, depth) {
-        if (depth === 0) {
-            ctx.beginPath();
-            ctx.moveTo(x, y - size / 2);
-            ctx.lineTo(x - size / 2, y + size / 2);
-            ctx.lineTo(x + size / 2, y + size / 2);
-            ctx.closePath();
-            ctx.fillStyle = 'black';
-            ctx.fill();
-        } else {
-            const newSize = size / 2;
-            drawTriangle(x, y - newSize / 2, newSize, depth - 1);
-            drawTriangle(x - newSize / 2, y + newSize / 2, newSize, depth - 1);
-            drawTriangle(x + newSize / 2, y + newSize / 2, newSize, depth - 1);
-        }
-    }
-
-    drawTriangle(centerX, centerY, size, depth);
-}
-
-// Download the generated image
-// function downloadImage() {
-   // const canvas = document.getElement
-// Download the generated image
-function downloadImage() {
-    const canvas = document.getElementById('canvas');
-    const link = document.createElement('a');
-    link.download = 'nirmana_titik.png'; // Nama file unduhan
-    link.href = canvas.toDataURL(); // Mengubah canvas menjadi data URL gambar
-    link.click(); // Simulasi klik untuk memulai unduhan
 }
