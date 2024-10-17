@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitung Harga Per Unit (USD/IDR) & Token</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: left;
+            inputmode: decimal; /* Menampilkan keyboard angka di perangkat mobile */
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result, .token-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: center;
+        }
+        .token-section {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Hitung Harga Per Unit (USD/IDR) & Token</h2>
+
+    <label for="marketCapUSD">Market Cap (USD):</label>
+    <input type="text" id="marketCapUSD" placeholder="Masukkan Market Cap dalam USD" oninput="formatInputNumber(this); calculatePricePerUnit()">
+
+    <label for="supply">Total Suplai Beredar:</label>
+    <input type="text" id="supply" placeholder="Masukkan total suplai beredar" oninput="formatInputNumber(this); calculatePricePerUnit()">
+
+    <div class="result" id="priceResult"></div>
+
+    <!-- Bagian untuk menghitung nilai token pengguna -->
+    <div class="token-section" id="tokenSection">
+        <h3>Hitung Nilai Token Anda</h3>
+        <label for="yourTokens">Jumlah Token yang Anda Miliki:</label>
+        <input type="text" id="yourTokens" placeholder="Masukkan jumlah token yang Anda miliki" oninput="formatInputNumber(this)">
+        <button onclick="calculateTokenValue()">Hitung Nilai Token</button>
+
+        <div class="token-result" id="tokenResult"></div>
+    </div>
+</div>
+
+<script>
+    const exchangeRate = 15000;  // Kurs USD ke IDR
+    let priceUSD = 0;
+    let priceIDR = 0;
+
+    // Fungsi untuk menambahkan titik ribuan pada input
+    function formatInputNumber(input) {
+        let value = input.value.replace(/,/g, ''); // Hapus pemisah ribuan
+        if (!isNaN(value) && value !== "") {
+            input.value = formatNumberWithCommas(value); // Format dengan pemisah ribuan
+        }
+    }
+
+    // Fungsi untuk memformat angka dengan pemisah ribuan
+    function formatNumberWithCommas(number) {
+        let parts = number.split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
+
+    // Fungsi untuk menghitung harga per unit berdasarkan market cap dan suplai
+    function calculatePricePerUnit() {
+        const marketCapUSD = parseFloat(document.getElementById("marketCapUSD").value.replace(/,/g, ''));
+        const supply = parseFloat(document.getElementById("supply").value.replace(/,/g, ''));
+
+        if (isNaN(marketCapUSD) || isNaN(supply) || supply <= 0) {
+            document.getElementById("priceResult").innerHTML = "Silakan masukkan angka yang valid!";
+            document.getElementById("tokenSection").style.display = "none";  // Sembunyikan bagian token
+        } else {
+            priceUSD = marketCapUSD / supply;
+            priceIDR = priceUSD * exchangeRate;
+
+            // Jika harga per unit sangat kecil, tampilkan lebih banyak angka desimal
+            if (priceUSD < 0.0001) {
+                document.getElementById("priceResult").innerHTML = 
+                    "Harga Per Unit: <br>USD $" + priceUSD.toFixed(8) + 
+                    "<br>IDR Rp " + priceIDR.toFixed(4).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            } else {
+                document.getElementById("priceResult").innerHTML = 
+                    "Harga Per Unit: <br>USD $" + priceUSD.toLocaleString('en-US', { minimumFractionDigits: 4 }) + 
+                    "<br>IDR Rp " + priceIDR.toLocaleString('id-ID', { minimumFractionDigits: 4 });
+            }
+
+            // Tampilkan bagian untuk menghitung nilai token
+            document.getElementById("tokenSection").style.display = "block";
+        }
+    }
+
+    // Fungsi untuk menghitung nilai token pengguna
+    function calculateTokenValue() {
+        const yourTokens = parseFloat(document.getElementById("yourTokens").value.replace(/,/g, ''));
+
+        if (isNaN(yourTokens) || yourTokens <= 0) {
+            document.getElementById("tokenResult").innerHTML = "Silakan masukkan jumlah token yang valid!";
+        } else {
+            const tokenValueUSD = yourTokens * priceUSD;
+            const tokenValueIDR = yourTokens * priceIDR;
+
+            document.getElementById("tokenResult").innerHTML = 
+                "Nilai Token Anda: <br>USD $" + tokenValueUSD.toLocaleString('en-US', { minimumFractionDigits: 4 }) + 
+                "<br>IDR Rp " + tokenValueIDR.toLocaleString('id-ID', { minimumFractionDigits: 4 });
+        }
+    }
+</script>
+
+</body>
+</html>
