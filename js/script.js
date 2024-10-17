@@ -292,7 +292,7 @@ function generatePattern() {
             break;
         case 'spiral':
             drawSpiralPattern(ctx);
-        cass 'GradientSquare':
+        case 'GradientSquare':
             drawGradientSquarePattern(ctx);
             break;
         case 'flower':
