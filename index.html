@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nirmana Titik Generator</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <h1>Nirmana Titik Generator</h1>
+
+    <div id="controls">
+        <label for="patternType">Pilih Pola:</label>
+        <select id="patternType">
+            <option value="symmetry">Simetris</option>
+            <option value="random">Acak</option>
+            <option value="gradation">Gradasi</option>
+            <option value="wave">Gelombang</option>
+            <option value="concentric">Konsentris</option>
+        </select>
+        <br><br>
+        
+        <input type="file" id="imageInput" accept="image/*">
+        <br>
+        <button onclick="generatePattern()">Generate Nirmana</button>
+    </div>
+
+    <canvas id="canvas" width="500" height="500"></canvas>
+
+    <script src="js/script.js"></script>
+
+</body>
+</html>
