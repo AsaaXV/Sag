@@ -1,41 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nirmana Titik Gradasi</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Pembuat Nirmana Titik</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        select, input[type="file"] {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Nirmana Titik Estetis</h1>
-
+    <h1>Pembuat Nirmana Titik</h1>
     <div id="controls">
-        <label for="patternType">Pilih Pola:</label>
+        <label for="patternType">Pilih Jenis Pola:</label>
         <select id="patternType">
             <option value="lissajous">Lissajous</option>
             <option value="spiral">Spiral</option>
-            <option value="flower">Bunga Polar</option>
-            <option value="lemniscate">Lemniscate (∞)</option>
+            <option value="flower">Bunga</option>
+            <option value="lemniscate">Lemniscate</option>
             <option value="fractal">Fraktal Sierpinski</option>
-            <option value="symmetric">Pola Simetris</option> <!-- Opsi baru: Pola Simetris -->
-            <option value="random">Pola Acak</option> <!-- Opsi baru: Pola Acak -->
-            <option value="wave">Pola Gelombang</option> <!-- Opsi baru: Pola Gelombang -->
+            <option value="symmetric">Simetris</option>
+            <option value="random">Acak</option>
+            <option value="wave">Gelombang</option>
         </select>
-        <br><br>
 
-        <!-- Input untuk meng-upload gambar -->
-        <label for="imageUpload">Upload Gambar untuk Titik:</label>
-        <input type="file" id="imageUpload" accept="image/*" />
-        <br><br>
+        <label for="imageUpload">Upload Gambar (Opsional):</label>
+        <input type="file" id="imageUpload" accept="image/*">
 
-        <button onclick="generatePattern()">Generate Nirmana</button>
-        <button onclick="downloadImage()">Unduh Gambar</button>
+        <button id="generateBtn">Generate Pola</button>
+        <button id="downloadBtn">Download Gambar</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script src="js/script.js"></script>
-
 </body>
 </html>
