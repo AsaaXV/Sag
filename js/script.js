@@ -1,30 +1,10 @@
-let uploadedImage = null;
-
-// Handle image upload
-document.getElementById('imageInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                uploadedImage = img;
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-// Adjust canvas size to fill the screen
-function adjustCanvasSize() {
-    const canvas = document.getElementById('canvas');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+// Helper function to draw a custom point or image
+function drawPoint(ctx, x, y, size = 5) {
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fillStyle = 'black';
+    ctx.fill();
 }
-
-window.addEventListener('resize', adjustCanvasSize);
-adjustCanvasSize();
 
 // Generate pattern based on the selected option
 function generatePattern() {
@@ -36,108 +16,116 @@ function generatePattern() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     switch (patternType) {
-        case 'symmetry':
-            drawSymmetryPattern(ctx);
+        case 'lissajous':
+            drawLissajousPattern(ctx);
             break;
-        case 'random':
-            drawRandomPattern(ctx);
+        case 'spiral':
+            drawSpiralPattern(ctx);
             break;
-        case 'gradation':
-            drawGradationPattern(ctx);
+        case 'flower':
+            drawFlowerPattern(ctx);
             break;
-        case 'wave':
-            drawWavePattern(ctx);
+        case 'lemniscate':
+            drawLemniscatePattern(ctx);
             break;
-        case 'concentric':
-            drawConcentricPattern(ctx);
+        case 'fractal':
+            drawSierpinskiFractal(ctx);
             break;
         default:
             break;
     }
 }
 
-// Helper function to draw a custom point or image
-function drawPoint(ctx, x, y) {
-    const size = 40; // Fixed size for each dot (40x40)
-    if (uploadedImage) {
-        ctx.drawImage(uploadedImage, x - size / 2, y - size / 2, size, size);
-    } else {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(x - size / 2, y - size / 2, size, size); // Draw 40x40 square
-    }
-}
-
-// Symmetry pattern: Evenly spaced dots in grid
-function drawSymmetryPattern(ctx) {
-    const spacingX = 100;
-    const spacingY = 100;
-
-    for (let x = spacingX / 2; x < canvas.width; x += spacingX) {
-        for (let y = spacingY / 2; y < canvas.height; y += spacingY) {
-            drawPoint(ctx, x, y);
-        }
-    }
-}
-
-// Random pattern: Dots randomly but sparsely placed with 40x40 size
-function drawRandomPattern(ctx) {
-    const numberOfDots = 50;
-
-    for (let i = 0; i < numberOfDots; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        drawPoint(ctx, x, y);
-    }
-}
-
-// Gradation pattern: From small clusters to large across the canvas
-function drawGradationPattern(ctx) {
+// Lissajous curve pattern (complex curves based on sine and cosine)
+function drawLissajousPattern(ctx) {
+    const A = 150, B = 150; // Amplitudes
+    const a = 5, b = 4; // Frequencies
+    const delta = Math.PI / 2; // Phase shift
+    const points = 1000;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const layers = 10;
-    const size = 40; // Fixed size
 
-    for (let i = 0; i < layers; i++) {
-        const radius = 50 + i * 50;
-        const numPoints = 6 + i * 4;
-        const angleStep = (Math.PI * 2) / numPoints;
-
-        for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            drawPoint(ctx, x, y);
-        }
+    for (let t = 0; t < points; t++) {
+        const x = centerX + A * Math.sin(a * t * 0.01 + delta);
+        const y = centerY + B * Math.sin(b * t * 0.01);
+        drawPoint(ctx, x, y, 3);
     }
 }
 
-// Wave pattern: 40x40 dots along a sine wave
-function drawWavePattern(ctx) {
-    const amplitude = 80;
-    const frequency = 0.02;
-    const spacing = 60; // Distance between dots
-
-    for (let x = 0; x < canvas.width; x += spacing) {
-        const y = canvas.height / 2 + Math.sin(x * frequency) * amplitude;
-        drawPoint(ctx, x, y);
-    }
-}
-
-// Concentric pattern: Dots in expanding concentric circles
-function drawConcentricPattern(ctx) {
+// Spiral pattern (logarithmic spiral)
+function drawSpiralPattern(ctx) {
+    const a = 5; // Controls the tightness of the spiral
+    const b = 0.2; // Controls the distance between the spiral turns
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const numberOfCircles = 8;
-    const size = 40; // Fixed size for each dot
+    const maxAngle = Math.PI * 8; // 4 complete rotations
+    const points = 1000;
 
-    for (let i = 0; i < numberOfCircles; i++) {
-        const radius = 60 + i * 70;
-        const numPoints = 8 + i * 4;
-        const angleStep = (Math.PI * 2) / numPoints;
+    for (let t = 0; t < maxAngle; t += maxAngle / points) {
+        const r = a * Math.exp(b * t); // Exponential growth
+        const x = centerX + r * Math.cos(t);
+        const y = centerY + r * Math.sin(t);
+        drawPoint(ctx, x, y, 3);
+    }
+}
 
-        for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            drawPoint(ctx, x, y);
+// Flower pattern using polar coordinates
+function drawFlowerPattern(ctx) {
+    const k = 7; // Controls the number of petals
+    const points = 1000;
+    const size = 200;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    for (let t = 0; t < points; t++) {
+        const theta = (t / points) * Math.PI * 2;
+        const r = size * Math.cos(k * theta);
+        const x = centerX + r * Math.cos(theta);
+        const y = centerY + r * Math.sin(theta);
+        drawPoint(ctx, x, y, 3);
+    }
+}
+
+// Lemniscate pattern (figure-eight curve)
+function drawLemniscatePattern(ctx) {
+    const a = 200; // Controls the size of the lemniscate
+    const points = 1000;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    for (let t = 0; t < points; t++) {
+        const theta = (t / points) * Math.PI * 2;
+        const r = a * Math.sqrt(Math.cos(2 * theta));
+        const x = centerX + r * Math.cos(theta);
+        const y = centerY + r * Math.sin(theta);
+        drawPoint(ctx, x, y, 3);
+    }
+}
+
+// Sierpinski Fractal pattern (recursive triangle fractal)
+function drawSierpinskiFractal(ctx, depth = 5) {
+    const size = canvas.height * 0.8;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    function drawTriangle(x, y, size, depth) {
+        if (depth === 0) {
+            // Draw filled triangle
+            ctx.beginPath();
+            ctx.moveTo(x, y - size / 2);
+            ctx.lineTo(x - size / 2, y + size / 2);
+            ctx.lineTo(x + size / 2, y + size / 2);
+            ctx.closePath();
+            ctx.fillStyle = 'black';
+            ctx.fill();
+        } else {
+            // Recursive case: draw 3 smaller triangles
+            const newSize = size / 2;
+            drawTriangle(x, y - newSize / 2, newSize, depth - 1);
+            drawTriangle(x - newSize / 2, y + newSize / 2, newSize, depth - 1);
+            drawTriangle(x + newSize / 2, y + newSize / 2, newSize, depth - 1);
         }
     }
+
+    drawTriangle(centerX, centerY, size, depth);
 }
