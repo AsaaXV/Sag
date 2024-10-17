@@ -21,6 +21,20 @@ function isColliding(point, radius) {
     return false;
 }
 
+// Fungsi untuk menggambar titik, mengganti dengan gambar jika di-upload
+function drawImage(ctx, x, y, size) {
+    if (uploadedImage) {
+        // Menggambar gambar yang di-upload
+        ctx.drawImage(uploadedImage, x - size / 2, y - size / 2, size, size);
+    } else {
+        // Jika tidak ada gambar, menggambar titik default (lingkaran hitam)
+        ctx.beginPath();
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2, true);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+    }
+}
+
 // Fungsi untuk menggambar pola Lissajous
 function drawLissajousPattern(ctx) {
     const canvasWidth = canvas.width;
