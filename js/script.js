@@ -234,6 +234,34 @@ function drawWavePattern(ctx) {
     }
 }
 
+// Fungsi untuk menggambar pola gradasi kotak sama sisi
+function drawGradientSquarePattern(ctx) {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const squareSize = Math.min(canvasWidth, canvasHeight) - 50; // Ukuran kotak
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+
+    const pointsCount = 500; // Jumlah titik
+    const stepSize = squareSize / Math.sqrt(pointsCount); // Ukuran langkah berdasarkan jumlah titik
+
+    for (let i = 0; i < pointsCount; i++) {
+        const row = Math.floor(i / Math.sqrt(pointsCount)); // Hitung baris
+        const col = i % Math.sqrt(pointsCount); // Hitung kolom
+
+        const x = centerX - squareSize / 2 + col * stepSize + stepSize / 2; // Posisi X
+        const y = centerY - squareSize / 2 + row * stepSize + stepSize / 2; // Posisi Y
+
+        // Hitung ukuran titik berdasarkan posisinya
+        const pointSize = (1 - (row / Math.sqrt(pointsCount))) * 15 + 5; // Gradasi dari besar ke kecil
+
+        if (!isColliding({ x, y }, pointSize)) {
+            drawPoint(ctx, x, y, pointSize);
+            points.push({ x, y, radius: pointSize });
+        }
+    }
+}
+
 // Fungsi download gambar dari canvas
 function downloadImage() {
     const canvas = document.getElementById('canvas');
@@ -264,6 +292,8 @@ function generatePattern() {
             break;
         case 'spiral':
             drawSpiralPattern(ctx);
+        cass 'GradientSquare':
+            drawGradientSquarePattern(ctx);
             break;
         case 'flower':
             drawFlowerPattern(ctx);
