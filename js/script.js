@@ -117,6 +117,34 @@ function drawWavePattern(ctx) {
     }
 }
 
+// Fungsi untuk generate pola simetris acak dengan gradasi gelombang
+function drawSymmetricWavePattern(ctx) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const maxRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
+    const pointsCount = 500;
+    const frequency = 10;
+    const amplitude = 50;
+    const randomFactor = 100;
+
+    for (let i = 0; i < pointsCount; i++) {
+        const angle = (i / pointsCount) * Math.PI * 2;
+        const wave = Math.sin(frequency * angle) * amplitude;
+        const randomOffset = (Math.random() - 0.5) * randomFactor;
+        const radius = maxRadius + wave + randomOffset;
+
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        const pointSize = (i / pointsCount) * 15 + 5;
+
+        if (!isColliding({ x, y }, pointSize)) {
+            drawPoint(ctx, x, y, pointSize);
+            points.push({ x, y, radius: pointSize });
+        }
+    }
+}
+
 // Fungsi download gambar dari canvas
 function downloadImage() {
     const canvas = document.getElementById('canvas');
