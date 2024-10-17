@@ -3,30 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nirmana Titik Generator</title>
+    <title>Nirmana Titik Gradasi</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-    <h1>Nirmana Titik Generator</h1>
+    <h1>Nirmana Titik Estetis</h1>
 
     <div id="controls">
         <label for="patternType">Pilih Pola:</label>
         <select id="patternType">
-            <option value="symmetry">Simetris</option>
-            <option value="random">Acak</option>
-            <option value="gradation">Gradasi</option>
-            <option value="wave">Gelombang</option>
-            <option value="concentric">Konsentris</option>
+            <option value="lissajous">Lissajous</option>
+            <option value="spiral">Spiral</option>
+            <option value="flower">Bunga Polar</option>
+            <option value="lemniscate">Lemniscate (∞)</option>
+            <option value="fractal">Fraktal Sierpinski</option>
         </select>
         <br><br>
-        
-        <input type="file" id="imageInput" accept="image/*">
-        <br>
         <button onclick="generatePattern()">Generate Nirmana</button>
+        <button onclick="downloadImage()">Unduh Gambar</button>
     </div>
 
-    <canvas id="canvas" width="500" height="500"></canvas>
+    <canvas id="canvas"></canvas>
 
     <script src="js/script.js"></script>
 
