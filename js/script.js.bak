@@ -68,83 +68,62 @@ function drawPoint(ctx, x, y, size) {
     }
 }
 
-// Symmetry pattern: Create grid of dots with even spacing
+// Symmetry pattern: Cover the entire canvas
 function drawSymmetryPattern(ctx) {
-    const size = 10;
-    const spacingX = 80;
-    const spacingY = 80;
-
-    for (let x = spacingX; x < canvas.width; x += spacingX) {
-        for (let y = spacingY; y < canvas.height; y += spacingY) {
+    const size = 20; // Size of each dot
+    const spacing = 40; // Space between dots
+    for (let x = 0; x < canvas.width; x += spacing) {
+        for (let y = 0; y < canvas.height; y += spacing) {
             drawPoint(ctx, x, y, size);
         }
     }
 }
 
-// Random pattern: Spread dots randomly but aesthetically across the canvas
+// Random pattern: Cover entire canvas with random dots
 function drawRandomPattern(ctx) {
-    const numberOfDots = 100;
-    const minSize = 5;
-    const maxSize = 20;
-
+    const size = 20;
+    const numberOfDots = 300; // Increase number of dots to fill canvas
     for (let i = 0; i < numberOfDots; i++) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
-        const size = minSize + Math.random() * (maxSize - minSize);
         drawPoint(ctx, x, y, size);
     }
 }
 
-// Gradation pattern: From small to large dots
+// Gradation pattern: From center to edge
 function drawGradationPattern(ctx) {
-    const layers = 10;
     const sizeStart = 5;
-    const sizeEnd = 50;
+    const sizeEnd = 40;
+    const numberOfLayers = 20;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-
-    for (let i = 0; i < layers; i++) {
-        const size = sizeStart + (sizeEnd - sizeStart) * (i / layers);
-        const angleStep = (Math.PI * 2) / (i * 8 + 10);
-
-        for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
-            const x = centerX + Math.cos(angle) * i * 50;
-            const y = centerY + Math.sin(angle) * i * 50;
-            drawPoint(ctx, x, y, size);
-        }
+    
+    for (let i = 0; i < numberOfLayers; i++) {
+        const size = sizeStart + ((sizeEnd - sizeStart) * i) / numberOfLayers;
+        drawPoint(ctx, centerX, centerY - i * 30, size);
     }
 }
 
-// Wave pattern: Sine wave with evenly spaced dots
+// Wave pattern: Sine wave across full width
 function drawWavePattern(ctx) {
-    const size = 15;
-    const amplitude = 60;
-    const frequency = 0.02;
-
-    for (let x = 0; x < canvas.width; x += 30) {
+    const size = 10;
+    const amplitude = 100; // Wave amplitude
+    const frequency = 0.05; // Frequency of the wave
+    for (let x = 0; x < canvas.width; x += 20) {
         const y = canvas.height / 2 + Math.sin(x * frequency) * amplitude;
         drawPoint(ctx, x, y, size);
     }
 }
 
-// Concentric pattern: Dots arranged in concentric circles
+// Concentric circles pattern: Cover canvas with concentric dots
 function drawConcentricPattern(ctx) {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const numberOfCircles = 15;
-    const sizeStart = 5;
-    const sizeEnd = 20;
-
+    const sizeStart = 10;
+    const numberOfCircles = 30;
+    
     for (let i = 0; i < numberOfCircles; i++) {
-        const radius = 40 + i * 30;
-        const size = sizeStart + (sizeEnd - sizeStart) * (i / numberOfCircles);
-        const numPoints = i * 8 + 12;
-        const angleStep = (Math.PI * 2) / numPoints;
-
-        for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            drawPoint(ctx, x, y, size);
-        }
+        const size = sizeStart + i * 10;
+        drawPoint(ctx, centerX, centerY, size);
     }
 }
