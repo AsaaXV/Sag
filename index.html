@@ -18,8 +18,17 @@
             <option value="flower">Bunga Polar</option>
             <option value="lemniscate">Lemniscate (∞)</option>
             <option value="fractal">Fraktal Sierpinski</option>
+            <option value="symmetric">Pola Simetris</option> <!-- Opsi baru: Pola Simetris -->
+            <option value="random">Pola Acak</option> <!-- Opsi baru: Pola Acak -->
+            <option value="wave">Pola Gelombang</option> <!-- Opsi baru: Pola Gelombang -->
         </select>
         <br><br>
+
+        <!-- Input untuk meng-upload gambar -->
+        <label for="imageUpload">Upload Gambar untuk Titik:</label>
+        <input type="file" id="imageUpload" accept="image/*" />
+        <br><br>
+
         <button onclick="generatePattern()">Generate Nirmana</button>
         <button onclick="downloadImage()">Unduh Gambar</button>
     </div>
