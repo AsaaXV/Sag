@@ -1,68 +1,41 @@
 let points = [];
-let uploadedImage = null; // Variabel untuk menyimpan gambar yang di-upload
 
-// Fungsi untuk menangani gambar yang di-upload
-document.getElementById('imageUpload').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-            uploadedImage = img; // Simpan gambar yang di-upload
-            console.log('Gambar ter-load dan siap digunakan');
-        };
-    };
-
-    if (file) {
-        reader.readAsDataURL(file);
-    }
-});
-
-// Fungsi menggambar titik (sekarang mendukung gambar yang di-upload)
+// Fungsi untuk menggambar titik
 function drawPoint(ctx, x, y, radius) {
-    if (uploadedImage) {
-        // Jika ada gambar yang di-upload, gunakan gambar sebagai titik
-        const imgWidth = radius * 2;
-        const imgHeight = radius * 2;
-        ctx.drawImage(uploadedImage, x - radius, y - radius, imgWidth, imgHeight);
-    } else {
-        // Jika tidak ada gambar yang di-upload, gunakan lingkaran default
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'black';
-        ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+    ctx.fillStyle = 'black'; // Warna titik
+    ctx.fill();
 }
 
-// Fungsi untuk mengecek tabrakan antara titik
+// Fungsi untuk mendeteksi tabrakan titik
 function isColliding(point, radius) {
-    for (let i = 0; i < points.length; i++) {
-        const existingPoint = points[i];
-        const dx = existingPoint.x - point.x;
-        const dy = existingPoint.y - point.y;
+    for (const p of points) {
+        const dx = point.x - p.x;
+        const dy = point.y - p.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < existingPoint.radius + radius) {
+        if (distance < radius + p.radius) {
             return true;
         }
     }
     return false;
 }
 
-// Fungsi untuk generate pola Lissajous
+// Fungsi untuk menggambar pola Lissajous
 function drawLissajousPattern(ctx) {
-    const a = 100; // Amplitudo untuk sumbu X
-    const b = 100; // Amplitudo untuk sumbu Y
-    const delta = Math.PI / 2; // Perbedaan fase
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const a = 100; // Amplitudo
+    const b = 100; // Amplitudo
+    const delta = Math.PI / 2; // Fase
     const pointsCount = 500;
 
     for (let i = 0; i < pointsCount; i++) {
-        const t = (i / pointsCount) * (Math.PI * 2); // Parameter waktu
-        const x = a * Math.sin(3 * t + delta) + ctx.canvas.width / 2;
-        const y = b * Math.sin(2 * t) + ctx.canvas.height / 2;
-        const pointSize = Math.random() * 15 + 5; // Ukuran titik acak
+        const t = (i / pointsCount) * (Math.PI * 2);
+        const x = canvasWidth / 2 + a * Math.sin(3 * t + delta);
+        const y = canvasHeight / 2 + b * Math.sin(2 * t);
 
+        const pointSize = 5;
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -70,21 +43,20 @@ function drawLissajousPattern(ctx) {
     }
 }
 
-// Fungsi untuk generate pola Spiral
+// Fungsi untuk menggambar pola spiral
 function drawSpiralPattern(ctx) {
-    const pointsCount = 500;
-    const centerX = ctx.canvas.width / 2;
-    const centerY = ctx.canvas.height / 2;
-    const maxRadius = Math.min(ctx.canvas.width, ctx.canvas.height) / 2 - 50;
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const pointsCount = 1000;
 
     for (let i = 0; i < pointsCount; i++) {
-        const angle = (i / pointsCount) * Math.PI * 4; // 2 putaran penuh
-        const radius = (maxRadius / pointsCount) * i; // Radius bertambah seiring dengan i
+        const angle = 0.1 * i;
+        const radius = 2 * i;
 
-        const x = centerX + radius * Math.cos(angle);
-        const y = centerY + radius * Math.sin(angle);
-        const pointSize = Math.random() * 15 + 5; // Ukuran titik acak
+        const x = canvasWidth / 2 + radius * Math.cos(angle);
+        const y = canvasHeight / 2 + radius * Math.sin(angle);
 
+        const pointSize = (i / pointsCount) * 15 + 5; // Ukuran titik bertambah
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -92,21 +64,21 @@ function drawSpiralPattern(ctx) {
     }
 }
 
-// Fungsi untuk generate pola Bunga Polar
+// Fungsi untuk menggambar pola bunga
 function drawFlowerPattern(ctx) {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
     const pointsCount = 500;
-    const centerX = ctx.canvas.width / 2;
-    const centerY = ctx.canvas.height / 2;
-    const maxRadius = Math.min(ctx.canvas.width, ctx.canvas.height) / 2 - 50;
+    const petals = 8; // Jumlah kelopak
 
     for (let i = 0; i < pointsCount; i++) {
-        const angle = (i / pointsCount) * Math.PI * 4; // 2 putaran penuh
-        const radius = maxRadius * Math.sin(3 * angle); // Bunga dengan 3 kelopak
+        const t = (i / pointsCount) * Math.PI * 2;
+        const r = 100 * Math.sin(petals * t); // Ukuran kelopak
 
-        const x = centerX + radius * Math.cos(angle);
-        const y = centerY + radius * Math.sin(angle);
-        const pointSize = Math.random() * 15 + 5; // Ukuran titik acak
+        const x = canvasWidth / 2 + r * Math.cos(t);
+        const y = canvasHeight / 2 + r * Math.sin(t);
 
+        const pointSize = 5;
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -114,21 +86,20 @@ function drawFlowerPattern(ctx) {
     }
 }
 
-// Fungsi untuk generate pola Lemniscate (∞)
+// Fungsi untuk menggambar pola lemniscate
 function drawLemniscatePattern(ctx) {
-    const pointsCount = 500;
-    const centerX = ctx.canvas.width / 2;
-    const centerY = ctx.canvas.height / 2;
-    const maxRadius = Math.min(ctx.canvas.width, ctx.canvas.height) / 2 - 50;
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const pointsCount = 1000;
 
     for (let i = 0; i < pointsCount; i++) {
-        const t = (i / pointsCount) * Math.PI * 2; // Parameter untuk lemniscate
-        const radius = maxRadius * Math.sin(t); // Jari-jari mengikuti fungsi sinus
+        const t = (i / pointsCount) * Math.PI * 2; // Menghitung sudut
+        const r = 100 * Math.sqrt(Math.cos(2 * t)); // Radius pola lemniscate
 
-        const x = centerX + radius * Math.cos(t);
-        const y = centerY + radius * Math.sin(t);
-        const pointSize = Math.random() * 15 + 5; // Ukuran titik acak
+        const x = canvasWidth / 2 + r * Math.cos(t);
+        const y = canvasHeight / 2 + r * Math.sin(t);
 
+        const pointSize = 5;
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -136,52 +107,39 @@ function drawLemniscatePattern(ctx) {
     }
 }
 
-// Fungsi untuk generate pola Fraktal Sierpinski
-function drawSierpinskiFractal(ctx) {
-    const iterations = 5; // Jumlah iterasi fraktal
-    const initialPoints = [
-        { x: ctx.canvas.width / 2, y: 20 },
-        { x: 20, y: ctx.canvas.height - 20 },
-        { x: ctx.canvas.width - 20, y: ctx.canvas.height - 20 }
-    ];
-    drawSierpinski(ctx, initialPoints, iterations);
+// Fungsi untuk menggambar pola fraktal Sierpinski
+function drawSierpinskiFractal(ctx, x, y, size) {
+    if (size < 1) return;
+
+    // Menggambar segitiga
+    const height = (Math.sqrt(3) / 2) * size;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - size / 2, y + height);
+    ctx.lineTo(x + size / 2, y + height);
+    ctx.closePath();
+    ctx.fill();
+
+    // Rekursi untuk menggambar fraktal
+    drawSierpinskiFractal(ctx, x - size / 4, y + height / 2, size / 2);
+    drawSierpinskiFractal(ctx, x + size / 4, y + height / 2, size / 2);
+    drawSierpinskiFractal(ctx, x, y, size / 2);
 }
 
-function drawSierpinski(ctx, points, iterations) {
-    if (iterations === 0) {
-        drawPoint(ctx, points[0].x, points[0].y, 5);
-        drawPoint(ctx, points[1].x, points[1].y, 5);
-        drawPoint(ctx, points[2].x, points[2].y, 5);
-        return;
-    }
-
-    const midpoints = [
-        { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 },
-        { x: (points[1].x + points[2].x) / 2, y: (points[1].y + points[2].y) / 2 },
-        { x: (points[2].x + points[0].x) / 2, y: (points[2].y + points[0].y) / 2 }
-    ];
-
-    drawSierpinski(ctx, [points[0], midpoints[0], midpoints[2]], iterations - 1);
-    drawSierpinski(ctx, [midpoints[0], points[1], midpoints[1]], iterations - 1);
-    drawSierpinski(ctx, [midpoints[2], midpoints[1], points[2]], iterations - 1);
-}
-
-// Fungsi untuk generate pola simetris
+// Fungsi untuk menggambar pola simetris
 function drawSymmetricPattern(ctx) {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const maxRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
-    const pointsCount = 500;
+    const pointsCount = 200;
 
     for (let i = 0; i < pointsCount; i++) {
-        const angle = (i / pointsCount) * Math.PI * 2;
-        const radius = maxRadius * (i / pointsCount); // Simetris, titik mengikuti jari-jari bertahap
+        const angle = (i / pointsCount) * Math.PI * 2; // Menghitung sudut
+        const radius = 200; // Jari-jari
 
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
 
-        const pointSize = (i / pointsCount) * 15 + 5;
-
+        const pointSize = 5; // Ukuran titik
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -189,7 +147,7 @@ function drawSymmetricPattern(ctx) {
     }
 }
 
-// Fungsi untuk generate pola acak
+// Fungsi untuk menggambar pola acak
 function drawRandomPattern(ctx) {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
@@ -199,7 +157,6 @@ function drawRandomPattern(ctx) {
         const x = Math.random() * canvasWidth; // Koordinat acak X
         const y = Math.random() * canvasHeight; // Koordinat acak Y
         const pointSize = Math.random() * 15 + 5; // Ukuran titik acak
-
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -207,26 +164,17 @@ function drawRandomPattern(ctx) {
     }
 }
 
-// Fungsi untuk generate pola gelombang
+// Fungsi untuk menggambar pola gelombang
 function drawWavePattern(ctx) {
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const maxRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
-    const pointsCount = 500;
-    const frequency = 5; // Frekuensi lebih kecil
-    const amplitude = 20; // Amplitudo lebih kecil
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const pointsCount = 1000;
 
     for (let i = 0; i < pointsCount; i++) {
-        const angle = (i / pointsCount) * Math.PI * 2;
-        const wave = Math.sin(frequency * angle) * amplitude; // Gelombang sinusoidal
+        const x = (i / pointsCount) * canvasWidth; // Posisi X
+        const y = canvasHeight / 2 + 50 * Math.sin((i / pointsCount) * Math.PI * 4); // Posisi Y dengan gelombang sinus
 
-        const radius = maxRadius + wave;
-
-        const x = centerX + radius * Math.cos(angle);
-        const y = centerY + radius * Math.sin(angle);
-
-        const pointSize = (i / pointsCount) * 15 + 5;
-
+        const pointSize = 5; // Ukuran titik tetap
         if (!isColliding({ x, y }, pointSize)) {
             drawPoint(ctx, x, y, pointSize);
             points.push({ x, y, radius: pointSize });
@@ -234,7 +182,7 @@ function drawWavePattern(ctx) {
     }
 }
 
-// Fungsi untuk menggambar pola gradasi kotak sama sisi
+// Fungsi untuk menggambar pola kotak sama sisi dengan gradasi
 function drawGradientSquarePattern(ctx) {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
@@ -262,26 +210,17 @@ function drawGradientSquarePattern(ctx) {
     }
 }
 
-// Fungsi download gambar dari canvas
-function downloadImage() {
-    const canvas = document.getElementById('canvas');
-    const link = document.createElement('a');
-    link.download = 'nirmana_titik.png'; // Nama file unduhan
-    link.href = canvas.toDataURL(); // Mengubah canvas menjadi data URL gambar
-    link.click(); // Simulasi klik untuk memulai unduhan
-}
-
-// Generate pattern based on the selected option
+// Fungsi generate pattern berdasarkan pilihan yang dipilih
 function generatePattern() {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const patternType = document.getElementById('patternType').value;
 
     // Atur ukuran kanvas
-    canvas.width = window.innerWidth - 100; 
-    canvas.height = window.innerHeight - 200;
+    canvas.width = 600;  // Ukuran tetap untuk tampilan kotak
+    canvas.height = 600; // Ukuran tetap untuk tampilan kotak
 
-    // Clear the canvas and reset points array
+    // Clear the canvas dan reset points array
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     points = [];
 
@@ -292,8 +231,6 @@ function generatePattern() {
             break;
         case 'spiral':
             drawSpiralPattern(ctx);
-        case 'GradientSquare':
-            drawGradientSquarePattern(ctx);
             break;
         case 'flower':
             drawFlowerPattern(ctx);
@@ -302,7 +239,7 @@ function generatePattern() {
             drawLemniscatePattern(ctx);
             break;
         case 'fractal':
-            drawSierpinskiFractal(ctx);
+            drawSierpinskiFractal(ctx, canvas.width / 2, canvas.height / 2, 200);
             break;
         case 'symmetric': // Pola Simetris
             drawSymmetricPattern(ctx);
@@ -313,9 +250,21 @@ function generatePattern() {
         case 'wave': // Pola Gelombang
             drawWavePattern(ctx);
             break;
+        case 'gradientSquare': // Pola Kotak Gradasi
+            drawGradientSquarePattern(ctx);
+            break;
         default:
             break;
     }
+}
+
+// Fungsi untuk mendownload gambar
+function downloadImage() {
+    const canvas = document.getElementById('canvas');
+    const link = document.createElement('a');
+    link.download = 'nirmana.png';
+    link.href = canvas.toDataURL();
+    link.click();
 }
 
 // Event listener untuk tombol generate dan download
