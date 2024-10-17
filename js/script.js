@@ -1,4 +1,19 @@
 let points = [];
+let uploadedImage = null; // Variabel untuk menyimpan gambar yang di-upload
+
+// Fungsi untuk menggambar gambar atau titik default
+function drawImage(ctx, x, y, size) {
+    if (uploadedImage) {
+        console.log("Menggambar gambar di posisi: ", x, y, " dengan ukuran: ", size);
+        ctx.drawImage(uploadedImage, x - size / 2, y - size / 2, size, size);
+    } else {
+        // Jika tidak ada gambar, gunakan titik lingkaran
+        ctx.beginPath();
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2, true);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+    }
+}
 
 // Fungsi untuk menggambar titik
 function drawPoint(ctx, x, y, radius) {
